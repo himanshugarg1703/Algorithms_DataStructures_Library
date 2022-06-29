@@ -1,0 +1,1334 @@
+int prime[A];
+prime[0]=0;                      // 1 is not a prime number !
+void sieve()
+{
+    for(long long int i=2; i<=A; i++)
+    {
+        if(prime[i-1])
+        {
+            for(long long int j=i*i; j<=A; j+=i)
+            {
+                prime[j-1]=0;
+            }
+        }
+    }
+}
+ll power(ll x, ll y, ll p)
+{
+    ll res = 1;
+
+    x = x % p;
+    while (y > 0)
+    {
+        if (y & 1)
+            res = (res*x) % p;
+        y = y>>1;
+        x = (x*x) % p;
+    }
+    return res;
+}
+ll modInverse(ll n, ll p)
+{
+    return power(n, p-2, p);
+}
+ll ncr(ll n, ll r, ll p)
+{
+   if (r==0)
+      return 1;
+
+    ll fac[n+1];
+    fac[0] = 1;
+    for (ll i=1 ; i<=n; i++)
+        fac[i] = fac[i-1]*i%p;
+
+    return (fac[n]* modInverse(fac[r], p) % p *
+            modInverse(fac[n-r], p) % p) % p;
+}
+int gcd(int a,int b)
+{
+        if(b == 0)return a;
+        return gcd(b,a % b);
+}
+int lcm(int a,int b)
+{
+        return a*(b/gcd(a,b));
+}
+vector<int> adj[200000];
+int visited[200000];
+queue<int> q;
+int d[200000];
+int parent[200000];
+int u,siz;
+void bfs(int w)
+{
+    q.push(w);
+    visited[w-1]=1;
+    d[w-1]=0;
+    parent[w-1]=w;
+    while(!q.empty())
+    {
+        u = q.front();
+        q.pop();
+        siz=adj[u-1].size();
+        loop(j,0,siz)
+        {
+            if(visited[adj[u-1][j]-1]==0)
+            {
+                visited[adj[u-1][j]-1]=1;
+                q.push(adj[u-1][j]);
+                d[ adj[u-1][j]-1 ]=d[u-1]+1;
+                parent[ adj[u-1][j]-1 ]=u;
+            }
+        }
+    }
+}
+vector< pair<int,int> > adj[200000];
+deque<int> dq;
+int d[200000];       // to be set as:- d[source-1]=0 and for others d[i]=inf
+int u,siz;
+void bfs01(int w)
+{
+    dq.push_back(w);
+    while(!dq.empty())
+    {
+        u=dq.front();
+        dq.pop_front();
+        siz=adj[u-1].size();
+        loop(j,0,siz)
+        {
+            if( d[u-1]+adj[u-1][j].sd < d[adj[u-1][j].ft-1] )
+            {
+                d[adj[u-1][j].ft-1] = d[u-1]+adj[u-1][j].sd;
+                if(w)
+                    dq.push_back(adj[u-1][j].ft);
+                else
+                    dq.push_front(adj[u-1][j].ft);
+            }
+        }
+    }
+}
+vector< pair<int,int> > adj[200000];
+priority_queue< pii, vector<pii>, greater<pii> > pq;
+pii g,h;
+int siz;
+int d[200000];        // to be set as:- d[source-1]=0 and for others d[i]=inf
+int parent[200000];  // to be set as:- parent[source-1]=source and for others parent[i]=-1
+void dijkstra(int w)
+{
+    pq.push({0,w});
+    while(!pq.empty())
+    {
+        g=pq.top();
+        pq.pop();
+        if( g.ft!=d[g.sd-1] )
+        {
+            continue;
+        }
+        siz = adj[g.sd-1].size();
+        loop(j,0,siz)
+        {
+            h=adj[g.sd-1][j];
+            if(d[g.sd-1]+h.sd<d[h.ft-1])
+            {
+                d[h.ft-1] = d[g.sd-1]+h.sd;
+                parent[h.ft-1] = g.sd;
+                pq.push({d[h.ft-1],h.ft});
+            }
+        }
+    }
+}
+vector<int> adj[200000];
+int visited[200000];            // to be initially set equal to {0}
+int entry[200000];
+int exit[200000];
+int timer=0;
+void dfs(int w)
+{
+    visited[w-1]=1;
+    entry[w-1]=timer++;
+    vector<int>:: iterator it;
+    for (it = adj[w-1].begin(); it != adj[w-1].end(); it++)
+    {
+        if(!visited[*it-1])
+        {
+            dfs(*it);
+        }
+    }
+    exit[w-1]=timer++;
+}
+vector<int> adj[200000];
+int visited[200000];                   // to be initially set = {0}
+stack<int> s;
+int u,siz;
+void stackdfs(int w)
+{
+    visited[w-1]=1;
+    s.push(w);
+    while(!s.empty())
+    {
+        u=s.top();
+        s.pop();
+        siz=adj[u-1].size();
+        loop(j,0,siz)
+        {
+            if(visited[adj[u-1][j]-1]==0)
+            {
+                s.push(adj[u-1][j]);
+                visited[adj[u-1][j]-1]=1;
+            }
+        }
+    }
+}
+int arr[100000];
+int tree[400000];
+void buildsegtree(int arr[], int v, int left, int right)
+{
+    if(left==right)
+    {
+        tree[v]=arr[left];
+    }
+    else
+    {
+        buildsegtree(arr, v*2, left, (left+right)/2 );
+        buildsegtree(arr, v*2+1, (left+right)/2+1, right );
+        tree[v] = tree[v*2] + tree[v*2+1];
+    }
+}
+void update(int v, int left, int right, int ind, int val)
+{
+    if(left==right)
+    {
+        tree[v]=val;
+    }
+    else
+    {
+        if(ind<=(left+right)/2)
+        {
+            update(2*v, left, (left+right)/2, ind, val );
+        }
+        else
+        {
+            update(2*v+1, (left+right)/2+1, right, ind, val );
+        }
+
+        tree[v] = tree[2*v] + tree[2*v+1] ;
+    }
+}
+int query(int v, int left, int right, int l, int r)
+{
+    if(l>r){return 0;}
+    else if(left==l && right==r)
+    {
+        return tree[v];
+    }
+
+    return query(2*v, left, (left+right)/2, l, min(r,(left+right)/2) ) +
+             query(2*v+1, (left+right)/2+1, right, max(l,(left+right)/2+1), r ) ;
+}
+Z function for string:-
+int l=0,r=0;
+int z[n];                // to be initially set equal to {0}
+loop(i,1,n)
+{
+    z[i]=max(0,min(r+1-i,z[i-l]));
+    while(z[i]+i<n && s[z[i]+i]==s[z[i]])
+    {
+        z[i]++;
+        if(z[i]+i-1>r)
+        {
+            r=z[i]+i-1;
+            l=i;
+        }
+    }
+    //cout<<z[i]<<" ";
+}
+
+
+	Manacher algorithm to find all sub-palindromes in O(N) time :-
+
+	int d1[n],d2[n];
+        loop(i,0,n){d1[i]=0; d2[i]=0;}
+
+        int l=0, r=-1;
+        loop(i,0,n)
+        {
+            d1[i] = max(1, min(d1[l+r-i], r+1-i) );
+
+            while( i-d1[i]>=0 && i+d1[i]<n && s[i-d1[i]]==s[i+d1[i]] )
+            {
+                d1[i]++;
+            }
+
+            if( d1[i]-1+i > r )
+            {
+                l=i-d1[i]+1;
+                r=i+d1[i]-1;
+            }
+        }
+
+        l=0;
+        r=-1;
+        loop(i,0,n)
+        {
+            d2[i] = max(0, min(r+1-i, d2[l+r-i+1]) );
+
+            while( i-1-d2[i]>=0 && i+d2[i]<n && s[i-1-d2[i]] == s[i+d2[i]] )
+            {
+                d2[i]++;
+            }
+
+            if( i+d2[i]-1 > r)
+            {
+                l = i-d2[i];
+                r = i+d2[i]-1;
+            }
+       	}
+
+
+
+ll phi(ll n)
+{
+    ll result=n;
+    for(ll i=2; i*i<=n; i++)
+    {
+        if(n%i==0)
+        {
+            while(n%i==0)
+            {
+                n/=i;
+            }
+            result-=result/i;
+        }
+    }
+    if(n>1)
+    {
+        result-=result/n;
+    }
+
+    return result;
+}
+
+bool isPrime(lli a)
+{
+	lli sqr=sqrt(a);
+	if(a==1)return false;
+	for(int i=2;i<=sqr;i++)
+	{
+		if(a%i==0)
+		{	
+			return false;
+		}
+	}
+	//cout<<a<<" is prime "<<endl;
+	return true;
+}
+
+DSU :-
+ll parent[100000];
+ll rankk[100000];
+ll cost;
+ 
+void make_set(int w) {
+    parent[w] = w;
+    rankk[w] = 0;
+}
+ 
+int find_set(int w) {
+    if (w == parent[w])
+        return w;
+    return parent[w] = find_set(parent[w]);
+}
+ 
+void union_sets(int u, int w) {
+    u = find_set(u);
+    w = find_set(w);
+    if (u != w) 
+    {
+        if(rankk[u] < rankk[w])	swap(u, w);
+        parent[w] = u;
+        if (rankk[u] == rankk[w])  rankk[u]++;
+    }
+}
+
+
+
+
+// Segment tree Lazy Propagation : Addition on segment, querying for maximum....., just one doubt(starred)....
+
+
+int arr[100000];
+int t[100000];
+int lazy[100000];
+
+void build(int v, int left, int right)
+{
+    if(left==right)
+    {
+        t[v]=arr[left];
+    }
+    else
+    {
+        int mid=(left+right)/2;
+
+        build(2*v, left, mid);
+        build(2*v+1, mid+1, right);
+
+        t[v]=max(t[2*v],t[2*v+1]);
+    }
+}
+
+void push(int v, int left, int right)
+{
+    lazy[2*v]+=lazy[v];
+    lazy[2*v+1]+=lazy[v];
+    t[2*v]+=lazy[v];
+    t[2*v+1]+=lazy[v];
+    lazy[v]=0;
+}
+
+void update(int v, int left, int right, int l, int r, int val)
+{
+    if(l>r){return;}
+
+    else if(left==l && right==r){t[v]+=val; lazy[v]+=val;}
+
+    else
+    {
+        push(v,left,right);
+
+        int mid=(left+right)/2;
+
+        update(2*v, left, mid, l, min(r,mid), val);
+        update(2*v+1, mid+1, right, max(mid+1,l), r, val);
+
+        t[v]=max(t[2*v],t[2*v+1]);
+    }
+}
+
+int query(int v, int left, int right, int l, int r)
+{
+    if(l>r){return -inf;}
+
+    else if(left>=l && right<=r){return t[v];}          // ****************
+
+    else
+    {
+        push(v,left,right);
+
+        int mid=(left+right)/2;
+
+        return max(query(2*v, left, mid, l, min(mid,r)) , query(2*v+1, mid+1, right, max(mid+1,l), r));
+    }
+}
+
+
+
+// Segment tree Lazy Propagation : Addition on segment, querying for sum....., just one doubt(starred)....
+
+
+
+int arr[100000];
+int t[100000];
+int lazy[100000];
+
+void build(int v, int left, int right)
+{
+    if(left==right)
+    {
+        t[v]=arr[left];
+    }
+    else
+    {
+        int mid=(left+right)/2;
+
+        build(2*v, left, mid);
+        build(2*v+1, mid+1, right);
+
+        t[v]=t[2*v]+t[2*v+1];
+    }
+}
+
+void push(int v, int left, int right)
+{
+    int mid=(left+right)/2;
+
+    lazy[2*v]+=lazy[v];
+    t[2*v]+=lazy[v]*(mid-left+1);			// noice noice.....
+    lazy[2*v+1]+=lazy[v];
+    t[2*v+1]+=lazy[v]*(right-mid-1+1);
+    lazy[v]=0;
+}
+
+void update(int v, int left, int right, int l, int r, int val)
+{
+    if(l>r){return;}
+
+    else if(left==l && right==r){t[v]+=val*(right-left+1); lazy[v]+=val;}
+
+    else
+    {
+        push(v,left,right);
+
+        int mid=(left+right)/2;
+
+        update(2*v, left, mid, l, min(r,mid), val);
+        update(2*v+1, mid+1, right, max(mid+1,l), r, val);
+
+        t[v]=t[2*v]+t[2*v+1];
+    }
+}
+
+int query(int v, int left, int right, int l, int r)
+{
+    if(l>r){return 0;}
+
+    else if(left==l && right==r){return t[v];}          // ****************
+
+    else
+    {
+        push(v,left,right);
+
+        int mid=(left+right)/2;
+
+        return query(2*v, left, mid, l, min(mid,r)) + query(2*v+1, mid+1, right, max(mid+1,l), r);
+    }
+}
+
+
+
+// Segment tree Lazy Propagation : Assignment on segment, querying for sum....., just one doubt(starred).....
+
+
+
+int arr[100000];
+int t[100000];
+int marked[100000];
+
+void build(int v, int left, int right)
+{
+    if(left==right)
+    {
+        t[v]=arr[left];
+    }
+    else
+    {
+        int mid=(left+right)/2;
+
+        build(2*v, left, mid);
+        build(2*v+1, mid+1, right);
+
+        t[v]=t[2*v]+t[2*v+1];
+    }
+}
+
+void push(int v, int left, int right)
+{
+    int mid=(left+right)/2;
+
+    if(marked[v]==1)
+    {
+        marked[v]=0;
+        marked[2*v]=1;
+        marked[2*v+1]=1;
+        t[2*v]=(t[v]/(right-left+1))*(mid-left+1);
+        t[2*v+1]=(t[v]/(right-left+1))*(right-mid-1+1);
+    }
+}
+
+void update(int v, int left, int right, int l, int r, int val)
+{
+    if(l>r){return;}
+
+    else if(left==l && right==r){t[v]=val*(right-left+1); marked[v]=1;}
+
+    else
+    {
+        push(v,left,right);
+
+        int mid=(left+right)/2;
+
+        update(2*v, left, mid, l, min(r,mid), val);
+        update(2*v+1, mid+1, right, max(mid+1,l), r, val);
+
+        t[v]=t[2*v]+t[2*v+1];
+    }
+}
+
+int query(int v, int left, int right, int l, int r)
+{
+    if(l>r){return 0;}
+
+    else if(left==l && right==r){return t[v];}          // ****************
+
+    else
+    {
+        push(v,left,right);
+
+        int mid=(left+right)/2;
+
+        return query(2*v, left, mid, l, min(mid,r)) + query(2*v+1, mid+1, right, max(mid+1,l), r);
+    }
+}
+
+
+
+// Sparse Table to find maximum for any range [l,r] ........
+
+void build()
+{
+    loop(i,0,n)
+    {
+        st[i][0]=s[i];
+    }
+ 
+    loop(j,1,21)
+    {
+        loop(i,0,n)
+        {
+            if( i+powers[j]-1 >= n ) break;
+ 
+            st[i][j]=max(st[i][j-1], st[i+powers[j-1]][j-1]);
+        }
+    }
+}
+ 
+ll query(ll left, ll right)
+{
+    ll temp = logg[right-left+1];
+ 
+    ll temp2 = powers[temp];
+ 
+    return max( st[left][temp], st[right-temp2+1][temp] );
+}
+
+
+
+
+
+Algorithm to find the bridges in an undirected graph : 
+ll n,m,a,b,timer;
+ll visited[maxn];
+vector<ll> adj[maxn];
+ll tin[maxn];
+ll low[maxn];
+set<pll> bridges;
+void find_bridges(ll w, ll par)
+{
+    visited[w]=1;
+    tin[w]=timer;
+    low[w]=timer;
+    timer++;
+
+    for(ll u : adj[w])
+    {
+        if(u==par) continue;
+
+        if(visited[u]==1){low[w]=min(low[w],tin[u]);}
+        else
+        {
+            dfs(u,w);
+            low[w]=min(low[w],low[u]);
+
+            if(low[u]>tin[w])
+            {
+                bridges.insert({w,u});
+            }
+        }
+    }
+}
+
+Some copy-pasted functions :) :----
+
+ld power(ll x, ll y, ll p)
+{
+    ll res = 1;
+
+    x = x % p;
+    while (y > 0)
+    {
+        if (y & 1)
+            res = (res*x) % p;
+        y = y>>1;
+        x = (x*x) % p;
+    }
+    return res;
+}
+
+ll modInverse(ll n, ll p)
+{
+    return power(n, p-2, p);
+}
+
+ll fac[maxn];
+ll invfac[maxn];
+ll ncr(ll n, ll r, ll p)
+{
+    if(r>n) return 0;
+
+    if (r==0) return 1;
+
+    return (fac[n]* modInverse(fac[r], p) % p *
+            modInverse(fac[n-r], p) % p) % p;
+}
+
+ll log(ll a,ll b)
+{
+    if(a==1)
+        return b;
+    ll ans = 0;
+    while(b)
+    {
+        ans++;
+        b/=a;
+    }
+    return ans-1;
+}
+
+ll is_prime[200000+1];              // set as 1 initially.....
+ll smallest_factor[200000+1];        // set equal to the number initially...
+void sieve()
+{
+    for(ll i=2; i<=200000; i++)
+    {
+        if(is_prime[i])
+        {
+            for(ll j=i*i; j<=200000; j+=i)
+            {
+                if(is_prime[j]==1)
+                {
+                    is_prime[j]=0;
+                    smallest_factor[j]=i;
+                }
+            }
+        }
+    }
+}
+
+ll lp[200000+1]; // Caution :  set lp first as : lp[i] = i;
+vector<ll> pr;
+void sieve2()
+{
+    loop(i,2,1)
+    {
+        if(lp[i]==i){pr.pb(i);}
+
+        for(ll j=0; j<(int)pr.size() && i*pr[j]<=200000-1 && pr[j]<=lp[i]; j++)
+        {
+            lp[i*pr[j]]=pr[j];
+        }
+    }
+}
+
+//TRIE
+
+struct trie{
+    bool end;
+    unordered_map<char,trie*> m;
+    trie()
+    {
+        end = false;
+    }
+};
+
+struct trie* root ;
+
+void insert(string str)
+{
+    struct trie* curr = root;
+    for(auto ch : str)
+    {
+        if(!curr->m.count(ch))
+            curr->m[ch] = new trie;
+        curr = curr->m[ch];
+    }
+    curr->end = true;
+}
+
+bool search(string str)
+{
+    struct trie* curr = root;
+    for(auto ch : str)
+    {
+        if(!curr->m.count(ch))
+            return false;
+        curr = curr->m[ch];
+    }
+    return curr->end ;
+}
+
+void dfs(string str,struct trie* curr)
+{
+    if(curr->end)
+        cout << str << "\n";
+    for(int i=0;i<26;i++)
+    {
+        char ch = i+'a';
+        if(curr->m.count(ch))
+        {
+            dfs(str + ch,curr->m[ch]);
+        }
+    }
+}
+
+bool prefix(string str)
+{
+    struct trie* curr = root;
+    for(auto ch : str)
+    {
+        if(!curr->m.count(ch))
+            return false;
+        curr = curr->m[ch];
+    }
+    bool found = false;
+    for(int i=0;i<26;i++)
+    {
+        char ch = i+'a';
+        if(curr->m.count(ch))
+        {
+            found = true;
+            dfs(str + ch,curr->m[ch]);
+        }
+    }
+    return found;
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    root = new trie;
+    int n;
+    cin >> n;
+    while(n--)
+    {
+        string str;
+        cin >> str;
+        insert(str);
+    }
+    cin >> n;
+    while(n--)
+    {
+        string str;
+        cin >> str;
+        if(search(str))
+            cout << "Found\n";
+        else 
+            cout << "Not Found\n";
+        if(prefix(str))
+            cout << "Found Prefix\n";
+        else 
+            cout << "Prefix Not Found\n";
+    }
+}
+
+// Binary lifting
+// Bipartite graph
+// Maximum Bipartite Matching
+// Randomized quick sort
+// Flow algos including dinic
+// fft
+// string algos and data structures
+// game theory
+// two pointers
+// sliding window technique
+// small to large technique
+// cycles
+// bridges
+// geometry
+// divide and conquer
+// matrix exponentiation (fibonaaci like recurrences)
+// hld and centroid decomposition
+// centroid of tree
+// Stack min/max
+// Pbds like ordered set
+// Eulerian Path/Cycle i.e. visiting all edges exactly once.
+// Mo's algorithm
+// Convex hull
+// fenwick tree
+// sparse table
+// binary lifting
+// scanline algorithm(prefix sums :D)
+// stringstream
+// __builtin_popcountll (for long long int)
+
+// Persistent Segment Tree:
+int t[2400000];
+int le[2400000];
+int ri[2400000];
+int n,m,q,l,r,k,nodes,lo,hi,mi;
+int arr[maxn];
+int root[maxn+1];
+vector<ll> v1,v2;
+vector<ll> :: iterator it;
+
+int newleaf(int val)
+{
+    int a = ++nodes;
+    le[a] = ri[a] = 0;
+    t[a] = val;
+    return a;
+}
+
+int newparent(int a, int b)
+{
+    int c = ++nodes;
+    le[c] = a;
+    ri[c] = b;
+
+    t[c] = t[a]+t[b];
+
+    return c;
+}
+
+int build(int left, int right)
+{
+    if(left==right)
+    {
+        // t[v]=0;
+        return newleaf(0);
+    }
+    else
+    {
+        int mid = (left+right)/2;
+
+        //build(2*v, left, mid);
+        //build(2*v+1, mid+1, right)
+
+        return newparent( build(left, mid), build(mid+1, right) );
+    }
+}
+
+int update(int v, int left, int right, int ind, int val)
+{
+    if(left==right)
+    {
+        // t[v] = val;
+        return newleaf(t[v]+val);
+    }
+    else
+    {
+        int mid = (left+right)/2;
+
+        if(ind<=mid)
+        {
+            //update(2*v, left, mid, ind, val);
+            return newparent( update(le[v], left, mid, ind, val), ri[v] );
+        }
+        else
+        {
+            //update(2*v+1, mid+1, right, ind, val);
+            return newparent( le[v], update(ri[v], mid+1, right, ind, val) );
+        }
+
+        //t[v] = t[2*v] + t[2*v+1];
+        //return newparent( update(2*v, left, mid, ind, val), update(2*v+1, mid+1, right, ind, val) );
+    }
+}
+
+int query(int v, int left, int right, int l, int r)
+{
+    if(l>r)
+    {
+        return 0;
+    }
+    else if(l==left && r==right)
+    {
+        return t[v];
+    }
+    else
+    {
+        int mid = (left+right)/2;
+
+        return query(le[v], left, mid, l, min(r,mid))+query(ri[v], mid+1, right, max(mid+1,l), r);
+    }
+}
+
+Max flow:-
+ll n,m,x,a,b,c;
+ld l,r,mi;
+ll cap[50][50][2];
+ll cap2[50][50][2];
+vector<pll> adj[50];
+pll par[50];
+
+ll bfs(ll s, ll t)
+{
+    loop(i,0,n)
+    {
+        par[i]={-1,-1};
+    }
+    par[s]={s,-1};
+
+    queue<pll> q;
+    pll g;
+    q.push({s,inf});
+    while(!q.empty())
+    {
+        g = q.front();
+        q.pop();
+        for(pll u : adj[g.ft])
+        {
+            if(par[u.ft].ft==-1 && cap[g.ft][u.ft][u.sd])
+            {
+                par[u.ft].ft=g.ft;
+                par[u.ft].sd=u.sd;
+                if(u.ft==t){return min(g.sd,cap[g.ft][u.ft][u.sd]);}
+                q.push({u.ft,min(g.sd,cap[g.ft][u.ft][u.sd])});
+            }
+        }
+    }
+
+    return 0;
+}
+
+ll max_flow(ll s, ll t)
+{
+    ll tot_flow = 0;
+    ll new_flow;
+    while((new_flow = bfs(s,t)))
+    {
+        tot_flow+=new_flow;
+        ll cur=t;
+        while(cur!=s)
+        {
+            if(par[cur].sd==0)
+            {
+                cap[ par[cur].ft ][ cur ][0] -= new_flow;
+                cap[ cur ][ par[cur].ft ][1] += new_flow;
+            }
+            else
+            {
+                cap[ par[cur].ft ][ cur ][1] -= new_flow;
+                cap[ cur ][ par[cur].ft ][0] += new_flow;
+            }
+            cur = par[cur].ft;
+        }
+    }
+
+    return tot_flow;
+}
+
+ll check(ld f)
+{
+    loop(i,0,n)
+    {
+        loop(j,0,n)
+        {
+            loop(k,0,2)
+            {
+                cap[i][j][k] = floor((double)(cap2[i][j][k]*1.0/f));
+            }
+        }
+    }
+
+    ll floww = max_flow(0,n-1);
+
+    if(floww>=x){return 1;}
+    else{return 0;}
+}
+cin>>n>>m>>x;
+        loop(i,0,n)
+        {
+            loop(j,0,n)
+            {
+                cap[i][j][0]=cap[i][j][1]=0;
+            }
+        }
+        loop(i,0,m)
+        {
+            cin>>a>>b>>c;
+            a--;
+            b--;
+            adj[a].pb({b,0});
+            adj[b].pb({a,1});
+            cap[a][b][0]=c;
+        }
+
+
+maximum bipartite matching: (try_kuhn algorithm)
+int n, k;
+vector<vector<int>> g;
+vector<int> mt;
+vector<bool> used;
+
+bool try_kuhn(int v) {
+    if (used[v])
+        return false;
+    used[v] = true;
+    for (int to : g[v]) {
+        if (mt[to] == -1 || try_kuhn(mt[to])) {
+            mt[to] = v;
+            return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    //... reading the graph ...
+
+    mt.assign(k, -1);
+    for (int v = 0; v < n; ++v) {
+        used.assign(n, false);
+        try_kuhn(v);
+    }
+
+    for (int i = 0; i < k; ++i)
+        if (mt[i] != -1)
+            printf("%d %d\n", mt[i] + 1, i + 1);
+}
+
+
+
+
+
+// Trie implemented as array :-
+#include<bits/stdc++.h>
+#include<algorithm>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace std;
+using namespace __gnu_pbds;
+long long int mod = 1000000007;
+const int inf = 1000000000;
+const long long int inff = 9000000000000000000;
+#define pry  cout<<"YES\n"
+#define prn  cout<<"NO\n"
+#define prm cout<<"-1\n"
+#define nl cout<<"\n"
+#define loop(i,a,b) for(ll i=a;i<b;i+=1)
+#define rloop(i,a,b) for(ll i=a;i>=b;i-=1)
+#define ll long long int
+#define ld long double
+#define pb push_back
+#define pf push_front
+#define ft first
+#define sd second
+#define pii pair<int,int>
+#define pll pair<long long int, long long int>
+#define mysort(a) sort(a.begin(),a.end())
+#define myreverse(a) reverse(a.begin(),a.end())
+#define mylb(a,val) lower_bound(a.begin(),a.end(),val)
+#define myub(a,val) upper_bound(a.begin(),a.end(),val)
+#define mem(a,vall) memset(a, vall, sizeof(a))
+#define ordered_set tree< pll, null_type,less< pll >, rb_tree_tag,tree_order_statistics_node_update>
+
+ll ans;
+
+ll tri[1000000+1][2];
+
+ll endd[1000000+1];
+
+
+void insertt(string str)
+{
+    ll cur=0;
+
+    for(char ch : str)
+    {
+        if(tri[cur][ch-'0']==-1){ans++; tri[cur][ch-'0']=ans;}
+        cur = tri[cur][ch-'0'];
+    }
+
+    endd[cur] = true;
+}
+
+
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);cout.tie(0);
+    int test=1;
+    //freopen("dull.in", "r", stdin);       // file open for input
+    //freopen("output.txt", "w", stdout);   // file open for output
+    cin>>test;
+
+    while(test--)
+    {
+
+        ll n,m;
+        cin>>n>>m;
+        string s;
+        ans=0;
+        loop(i,0,n*m+1)
+        {
+            tri[i][0]=tri[i][1]=-1;
+            endd[i]=0;
+        }
+
+        loop(i,0,n)
+        {
+            cin>>s;
+
+            insertt(s);
+        }
+
+        cout<<ans;
+        nl;
+
+    }
+
+   return 0;
+}
+
+
+// Lazy long long int version
+ll t[4*maxn];
+ll marked[4*maxn];
+void build(ll v, ll left, ll right)
+{
+    if(left==right){t[v]=2; marked[v]=0;}
+    else
+    {
+        ll mid = (left+right)/2;
+        build(2*v, left, mid);
+        build(2*v+1, mid+1, right);
+        t[v]=2;
+        marked[v]=0;
+    }
+}
+ 
+void push(ll v, ll left, ll right)
+{
+    if(marked[v])
+    {
+        marked[2*v]=marked[2*v+1]=1;
+        marked[v]=0;
+        t[2*v]=t[2*v+1]=t[v];
+    }
+}
+ 
+void update(ll v, ll left, ll right, ll l, ll r, ll val)
+{
+    if(l>r){return;}
+ 
+    if(l==left && r==right){t[v]=val; marked[v]=1;}
+ 
+    else
+    {
+        ll mid = (left+right)/2;
+        push(v,left,right);
+        update(2*v, left, mid, l, min(mid,r), val);
+        update(2*v+1, mid+1, right, max(mid+1,l), r, val);
+        t[v]=min(t[2*v],t[2*v+1]);
+    }
+}
+ 
+ll query(ll v, ll left, ll right, ll l, ll r)
+{
+    if(l>r){return inff;}
+ 
+    if(l==left && r==right){return t[v];}
+ 
+    else
+    {
+        ll mid = (left+right)/2;
+        push(v,left,right);
+        return min(query(2*v, left, mid, l, min(mid,r)), query(2*v+1, mid+1, right, max(mid+1,l), r));
+    }
+} 
+
+
+// Normal segment tree long long int version:
+ll t[maxn];
+void build(ll v, ll left, ll right)
+{
+    if(left==right)
+    {
+        t[v]=inff;
+    }
+    else
+    {
+        ll mid = (left+right)/2;
+
+        build(2*v, left, mid);
+        build(2*v+1, mid+1, right);
+
+        t[v]=min(t[2*v], t[2*v+1]);
+    }
+}
+
+void update(ll v, ll left, ll right, ll ind, ll val)
+{
+    if(left==right)
+    {
+        t[v]=val;
+    }
+    else
+    {
+        ll mid = (left+right)/2;
+
+        if(ind<=mid)
+        {
+            update(2*v, left, mid, ind, val);
+        }
+        else
+        {
+            update(2*v+1, mid+1, right, ind, val);
+        }
+
+        t[v]=min(t[2*v], t[2*v+1]);
+    }
+}
+
+ll query(ll v, ll left, ll right, ll l, ll r)
+{
+    if(l>r) return inff;
+    
+    if(l==left && r==right) return t[v];
+    
+    ll mid = (left+right)/2;
+    return min( query(2*v, left, mid, l, min(mid,r)), query(2*v+1, mid+1, right, max(mid+1,l), r) );
+}
+
+
+Kth ancestor:
+ll kth_ancestor(ll a, ll k)
+{
+    if(k==0){return a;}
+ 
+    ll cur=k;
+ 
+    rloop(i,19,0)
+    {
+        if(cur>(1<<i))
+        {
+            cur-=(1<<i);
+            a=up[a][i];
+        }
+    }
+ 
+    return up[a][0];
+}
+
+int lca(int a, int b)
+{
+    rloop(i,19,0)
+    {
+        if(depth[a]-depth[b]>=(1<<i))
+        {
+            a = up[a][i];
+        }
+    }
+
+    rloop(i,19,0)
+    {
+        if(depth[b]-depth[a]>=(1<<i))
+        {
+            b = up[b][i];
+        }
+    }
+
+    if(a==b){return a;}
+
+    rloop(i,19,0)
+    {
+        if(up[a][i]!=up[b][i])
+        {
+            a=up[a][i];
+            b=up[b][i];
+        }
+    }
+
+    return up[a][0];
+}
